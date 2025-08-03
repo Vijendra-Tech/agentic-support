@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
 import { AppState, ChatSession, Message, Integration, File } from './types'
 import { generateId } from './utils'
+import { createSampleIntegrations } from './integration-utils'
 
 export const useAppStore = create<AppState>()(
   devtools(
@@ -11,7 +12,7 @@ export const useAppStore = create<AppState>()(
         currentSession: null,
         sessions: [],
         isLoading: false,
-        integrations: [],
+        integrations: createSampleIntegrations(),
         activeIntegration: null,
         selectedRepo: null, // Add selected repository state
         openFiles: [],
@@ -61,6 +62,13 @@ export const useAppStore = create<AppState>()(
             currentSession:
               state.currentSession?.id === sessionId ? null : state.currentSession,
           }))
+        },
+
+        setCurrentSession: (sessionId: string) => {
+          set((state) => {
+            const session = state.sessions.find((s) => s.id === sessionId)
+            return session ? { currentSession: session } : state
+          })
         },
 
         addMessage: (sessionId: string, message: Omit<Message, 'id' | 'timestamp'>) => {

@@ -414,41 +414,11 @@ export function IntegrationSetupDialog({ open, onOpenChange }: IntegrationSetupD
           </Button>
         </DialogFooter>
 
-        {/* --- Code Change Viewer Demo --- */}
-        <div className="mt-8">
-          {/* You can remove this after integration */}
-          <h3 className="font-semibold mb-2">Code Change Preview</h3>
-          <CodeChangeViewer
-            steps={[
-              { id: '1', label: 'Create file', status: 'success' },
-              { id: '2', label: 'Edit config', status: 'success' },
-              { id: '3', label: 'Update dependencies', status: 'pending' },
-              { id: '4', label: 'Run tests', status: 'pending' },
-            ]}
-            files={[
-              {
-                path: 'src/components/HelloWorld.tsx',
-                name: 'HelloWorld.tsx',
-                language: 'typescript',
-                content: `import React from 'react';\n\nexport function HelloWorld() {\n  return <div>Hello, world!</div>;\n}`,
-                editable: false,
-              },
-              {
-                path: 'src/config/app.config.js',
-                name: 'app.config.js',
-                language: 'javascript',
-                content: `module.exports = {\n  appName: 'Demo',\n  version: '1.0.0',\n};`,
-                editable: false,
-              },
-            ]}
-            error={undefined}
-          />
-        </div>
+
       </DialogContent>
     </Dialog>
   )
 }
 
-// --- Add import at the top ---
-import { CodeChangeViewer } from './code-change-viewer';
+
 

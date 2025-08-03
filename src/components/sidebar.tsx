@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { IntegrationSetupDialog } from '@/components/integration-setup-dialog'
 import { GithubRepoDrawer } from '@/components/github-repo-drawer'
+import { IntegrationsManagement } from '@/components/integrations-management'
 import { formatDate } from '@/lib/utils'
 import { 
   Plus, 
@@ -20,7 +21,10 @@ import {
   Trash2,
   Filter,
   Clock,
-  Tag
+  Tag,
+  ChevronLeft,
+  ChevronRight,
+  Menu
 } from 'lucide-react'
 
 export function Sidebar() {
@@ -30,15 +34,19 @@ export function Sidebar() {
     createSession, 
     deleteSession, 
     updateSession,
+    setCurrentSession,
     integrations,
     activeIntegration,
-    setActiveIntegration
+    setActiveIntegration,
+    sidebarOpen,
+    setSidebarOpen
   } = useAppStore()
   
   const [searchQuery, setSearchQuery] = useState('')
   const [filterStatus, setFilterStatus] = useState<string>('all')
   const [setupDialogOpen, setSetupDialogOpen] = useState(false)
   const [githubDrawerOpen, setGithubDrawerOpen] = useState(false)
+  const [integrationsManagementOpen, setIntegrationsManagementOpen] = useState(false)
 
   const filteredSessions = sessions.filter(session => {
     const matchesSearch = session.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -62,10 +70,8 @@ export function Sidebar() {
   }
 
   const handleSessionClick = (sessionId: string) => {
-    const session = sessions.find(s => s.id === sessionId)
-    if (session) {
-      updateSession(sessionId, { ...session })
-    }
+    // Set this session as the current session
+    setCurrentSession(sessionId)
   }
 
   const getStatusColor = (status?: string) => {
@@ -89,9 +95,25 @@ export function Sidebar() {
   }
 
   return (
-    <div className="w-80 h-full flex flex-col bg-background border-r">
+    <div className={`${sidebarOpen ? 'w-80' : 'w-12'} h-full flex flex-col bg-background dark:bg-background border-r border-border/50 dark:border-border/30 transition-all duration-300 ease-in-out relative`}>
+      {/* Toggle Button */}
+      <div className="absolute -right-3 top-4 z-10">
+        <Button
+          size="sm"
+          variant="outline"
+          className="h-6 w-6 p-0 rounded-full bg-background border shadow-md hover:shadow-lg transition-all"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+        >
+          {sidebarOpen ? (
+            <ChevronLeft className="h-3 w-3" />
+          ) : (
+            <ChevronRight className="h-3 w-3" />
+          )}
+        </Button>
+      </div>
+
       {/* Header */}
-      <div className="p-3 border-b">
+      <div className={`p-3 border-b border-border/50 dark:border-border/30 ${!sidebarOpen ? 'hidden' : ''}`}>
         <div className="flex items-center justify-between mb-3">
           <Button size="sm" onClick={handleCreateSession} className="w-full">
             <Plus className="w-4 h-4 mr-2" />
@@ -139,10 +161,44 @@ export function Sidebar() {
         </div>
       </div>
 
-      {/* Sessions List */}
-      <div className="flex-1 min-h-0">
+      {/* Collapsed State Icons */}
+      {!sidebarOpen && (
+        <div className="flex-1 flex flex-col items-center py-4 space-y-4">
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-8 w-8 p-0"
+            onClick={handleCreateSession}
+            title="New Session"
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
+          <div className="w-6 border-t border-border/30" />
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-8 w-8 p-0"
+            onClick={() => setSidebarOpen(true)}
+            title="Sessions"
+          >
+            <MessageSquare className="h-4 w-4" />
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-8 w-8 p-0"
+            onClick={() => setIntegrationsManagementOpen(true)}
+            title="Settings"
+          >
+            <Settings className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
+
+      {/* Sessions */}
+      <div className={`flex-1 min-h-0 ${!sidebarOpen ? 'hidden' : ''}`}>
         <ScrollArea className="h-full">
-          <div className="p-2 space-y-2">
+          <div className="p-3 space-y-2">
             {filteredSessions.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <MessageSquare className="w-8 h-8 mx-auto mb-2" />
@@ -222,64 +278,47 @@ export function Sidebar() {
         </ScrollArea>
       </div>
 
-      {/* Integrations Section */}
-      <div className="border-t p-4">
-        <h3 className="font-medium text-sm mb-3">Active Integrations</h3>
+      {/* Settings Section */}
+      <div className={`border-t border-border/50 dark:border-border/30 p-4 bg-card/20 dark:bg-card/10 ${!sidebarOpen ? 'hidden' : ''}`}>
+        <h3 className="font-medium text-sm mb-3 text-foreground dark:text-foreground">Settings</h3>
         <div className="space-y-2">
-          {integrations.length === 0 ? (
-            <div className="text-center py-4 text-muted-foreground">
-              <ExternalLink className="w-6 h-6 mx-auto mb-2" />
-              <p className="text-xs">No integrations configured</p>
-              <Button 
-                size="sm" 
-                variant="outline" 
-                className="mt-2 h-7 text-xs"
-                onClick={() => setSetupDialogOpen(true)}
-              >
-                <Settings className="w-3 h-3 mr-1" />
-                Setup
-              </Button>
+          {/* Integrations Management */}
+          <div
+            className="flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all duration-200 border border-border/30 dark:border-border/20 hover:bg-muted/60 dark:hover:bg-muted/40 hover:border-border/50 dark:hover:border-border/40"
+            onClick={() => setIntegrationsManagementOpen(true)}
+          >
+            <div className="p-1.5 bg-primary/10 dark:bg-primary/20 rounded-md">
+              <Settings className="w-4 h-4 text-primary" />
             </div>
-          ) : (
-            integrations.map((integration) => (
-              <div
-                key={integration.id}
-                className={`flex items-center gap-2 p-2 rounded-md cursor-pointer transition-colors ${
-                  activeIntegration?.id === integration.id 
-                    ? 'bg-primary/10 border border-primary/20' 
-                    : 'hover:bg-accent'
-                }`}
-                onClick={() => {
-                  setActiveIntegration(integration)
-                  if (integration.type === 'github') {
-                    setGithubDrawerOpen(true)
-                  }
-                }}
-              >
-                {integration.type === 'github' && <Github className="w-4 h-4" />}
-                {integration.type === 'jira' && <ExternalLink className="w-4 h-4" />}
-                {integration.type === 'ado' && <ExternalLink className="w-4 h-4" />}
-                
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium truncate">{integration.name}</div>
-                  <div className="text-xs text-muted-foreground capitalize">
-                    {integration.type}
-                  </div>
-                </div>
-                
-                <div className={`w-2 h-2 rounded-full ${
-                  integration.isActive ? 'bg-green-500' : 'bg-gray-400'
-                }`} />
+            
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-medium text-foreground dark:text-foreground">Integrations</div>
+              <div className="text-xs text-muted-foreground dark:text-muted-foreground">
+                Manage your connected services
               </div>
-            ))
-          )}
+            </div>
+            
+            <div className="flex items-center gap-2">
+              {integrations.length > 0 && (
+                <div className="flex items-center gap-1">
+                  <div className={`w-2 h-2 rounded-full ${
+                    integrations.some(i => i.isActive) ? 'bg-green-500' : 'bg-gray-400'
+                  }`} />
+                  <span className="text-xs text-muted-foreground">
+                    {integrations.filter(i => i.isActive).length}/{integrations.length}
+                  </span>
+                </div>
+              )}
+              <ExternalLink className="w-3 h-3 text-muted-foreground" />
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Integration Setup Dialog */}
-      <IntegrationSetupDialog 
-        open={setupDialogOpen} 
-        onOpenChange={setSetupDialogOpen} 
+      {/* Integrations Management */}
+      <IntegrationsManagement 
+        open={integrationsManagementOpen} 
+        onOpenChange={setIntegrationsManagementOpen} 
       />
       
       {/* GitHub Repository Drawer */}

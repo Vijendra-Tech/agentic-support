@@ -77,10 +77,10 @@ function FileTreeItem({
       <div 
         className={cn(
           "flex items-center gap-2 py-1.5 px-3 text-sm cursor-pointer transition-colors",
-          "hover:bg-slate-800/50 dark:hover:bg-slate-800/70",
-          isSelected && "bg-slate-200 dark:bg-slate-700 text-foreground dark:text-white",
+          "hover:bg-muted/80 dark:hover:bg-muted/60",
+          isSelected && "bg-muted dark:bg-muted text-foreground dark:text-foreground",
           "border-l-2 border-transparent",
-          isSelected && "border-l-blue-500"
+          isSelected && "border-l-primary"
         )}
         style={{ paddingLeft }}
         onClick={() => {
@@ -94,14 +94,14 @@ function FileTreeItem({
         {node.type === 'dir' ? (
           <>
             {node.isExpanded ? (
-              <ChevronDown className="w-4 h-4 text-slate-400" />
+              <ChevronDown className="w-4 h-4 text-muted-foreground" />
             ) : (
-              <ChevronRight className="w-4 h-4 text-slate-400" />
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
             )}
             {node.isExpanded ? (
-              <FolderOpen className="w-4 h-4 text-blue-400" />
+              <FolderOpen className="w-4 h-4 text-blue-500 dark:text-blue-400" />
             ) : (
-              <Folder className="w-4 h-4 text-blue-400" />
+              <Folder className="w-4 h-4 text-blue-500 dark:text-blue-400" />
             )}
           </>
         ) : (
@@ -111,7 +111,7 @@ function FileTreeItem({
           </>
         )}
         <span className={cn(
-          "truncate text-slate-800 dark:text-slate-200",
+          "truncate text-foreground dark:text-foreground",
           isSelected && "font-medium"
         )}>
           {node.name}
@@ -441,16 +441,16 @@ export function MonacoEditor() {
   return (
     <div className="flex flex-col h-full bg-white dark:bg-slate-900">
       {/* Header */}
-      <div className="flex items-center justify-between p-2 border-b dark:border-slate-700 bg-white dark:bg-slate-900">
+      <div className="flex items-center justify-between p-4 border-b border-border/50 dark:border-border/30 bg-card/80 dark:bg-card/60 backdrop-blur-xl">
         <div className="flex items-center space-x-2">
           <select
             value={selectedRepo || ''}
             onChange={(e) => setSelectedRepo(e.target.value || null)}
-            className="px-2 py-1 text-sm border rounded bg-background"
+            className="px-3 py-2 text-sm border border-border/40 dark:border-border/30 rounded-lg bg-background dark:bg-background text-foreground dark:text-foreground focus:border-primary/50 dark:focus:border-primary/60 focus:ring-2 focus:ring-primary/20 dark:focus:ring-primary/30 transition-all duration-200"
           >
-            <option value="">Select a repository</option>
+            <option value="" className="bg-background dark:bg-background text-foreground dark:text-foreground">Select a repository</option>
             {availableRepos.map((repo) => (
-              <option key={repo.id} value={repo.id}>
+              <option key={repo.id} value={repo.id} className="bg-background dark:bg-background text-foreground dark:text-foreground">
                 {repo.name}
               </option>
             ))}
@@ -493,7 +493,7 @@ export function MonacoEditor() {
       {/* Main content */}
       <div className="flex flex-1 overflow-hidden">
         {/* File explorer */}
-        <div className="w-64 h-full overflow-y-auto border-r border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+        <div className="w-64 h-full overflow-y-auto border-r border-border/50 dark:border-border/30 bg-card/40 dark:bg-card/20">
           {isLoading ? (
             <div className="flex items-center justify-center h-full">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -509,7 +509,7 @@ export function MonacoEditor() {
               />
             ))
           ) : (
-            <div className="p-4 text-center text-slate-500 dark:text-slate-400">
+            <div className="p-4 text-center text-muted-foreground">
               {selectedRepo ? 'No files found' : 'Select a repository'}
             </div>
           )}
@@ -533,7 +533,7 @@ export function MonacoEditor() {
               }}
             />
           ) : (
-            <div className="flex flex-col items-center justify-center h-full text-slate-400 dark:text-slate-500">
+            <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
               <FileText className="w-12 h-12 mb-4 opacity-30" />
               <p className="text-sm">Select a file to edit</p>
             </div>

@@ -6,12 +6,14 @@ export const MessageSchema = z.object({
   role: z.enum(['user', 'assistant', 'system']),
   content: z.string(),
   timestamp: z.date(),
+  isStreaming: z.boolean().optional(),
   metadata: z.object({
     source: z.enum(['github', 'jira', 'ado', 'manual']).optional(),
     ticketId: z.string().optional(),
     repositoryUrl: z.string().optional(),
     fileReferences: z.array(z.string()).optional(),
     generativeUI: z.any().optional(),
+    error: z.boolean().optional(),
   }).optional(),
 })
 
@@ -30,6 +32,23 @@ export const IntegrationSchema = z.object({
   }),
   isActive: z.boolean(),
   lastSync: z.date().optional(),
+  // Enhanced health monitoring fields
+  health: z.object({
+    status: z.enum(['connected', 'syncing', 'error', 'rate_limited', 'disconnected', 'warning']),
+    lastChecked: z.date(),
+    errorMessage: z.string().optional(),
+    responseTime: z.number().optional(), // in milliseconds
+    apiUsage: z.object({
+      used: z.number(),
+      limit: z.number(),
+      resetTime: z.date().optional(),
+    }).optional(),
+  }),
+  activity: z.object({
+    newItems: z.number().default(0), // New PRs, issues, tickets since last check
+    lastActivity: z.date().optional(),
+    recentActions: z.array(z.string()).optional(), // Recent activity descriptions
+  }).optional(),
 })
 
 export type Integration = z.infer<typeof IntegrationSchema>
@@ -74,6 +93,9 @@ export interface GitHubRepository {
   html_url: string
   clone_url: string
   default_branch: string
+  private?: boolean
+  stargazers_count?: number
+  forks_count?: number
 }
 
 export interface GitHubIssue {
@@ -181,6 +203,7 @@ export interface AppState {
   createSession: (title: string) => void
   updateSession: (sessionId: string, updates: Partial<ChatSession>) => void
   deleteSession: (sessionId: string) => void
+  setCurrentSession: (sessionId: string) => void
   addMessage: (sessionId: string, message: Omit<Message, 'id' | 'timestamp'>) => void
   
   setActiveIntegration: (integration: Integration | null) => void

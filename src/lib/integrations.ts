@@ -26,10 +26,34 @@ export class GitHubService {
         html_url: repo.html_url,
         clone_url: repo.clone_url,
         default_branch: repo.default_branch,
+        private: repo.private,
       }))
     } catch (error) {
       console.error('Error fetching repositories:', error)
       throw new Error('Failed to fetch repositories')
+    }
+  }
+
+  async getRepository(owner: string, repo: string): Promise<GitHubRepository | null> {
+    try {
+      const { data } = await this.octokit.rest.repos.get({
+        owner,
+        repo,
+      })
+      
+      return {
+        id: data.id,
+        name: data.name,
+        full_name: data.full_name,
+        description: data.description,
+        html_url: data.html_url,
+        clone_url: data.clone_url,
+        default_branch: data.default_branch,
+        private: data.private,
+      }
+    } catch (error) {
+      console.error('Error fetching repository:', error)
+      return null
     }
   }
 
